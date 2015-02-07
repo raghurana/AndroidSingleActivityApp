@@ -1,40 +1,30 @@
 package com.raghurana.singleactivityapp;
 
-import android.app.Activity;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
+import com.raghurana.singleactivityapp.constants.FragTag;
+import com.raghurana.singleactivityapp.events.EventAggregator;
+import com.raghurana.singleactivityapp.events.EventType;
 import com.raghurana.singleactivityapp.ui.drawer.AppNavDrawer;
-import com.raghurana.singleactivityapp.ui.drawer.NavItem;
 import com.raghurana.singleactivityapp.ui.drawer.NavItemFactory;
+import com.raghurana.singleactivityapp.utilities.BundleUtil;
+import com.raghurana.singleactivityapp.utilities.DisplayUtil;
 
 
 public class MainActivity extends ActionBarActivity {
 
     private AppNavDrawer navDrawer;
+    private EventAggregator eventBus;
+    private DisplayController displayController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         this.navDrawer = new AppNavDrawer(this);
         this.navDrawer.setItems(NavItemFactory.getNavItems());
@@ -44,6 +34,42 @@ public class MainActivity extends ActionBarActivity {
                 showFragmentAtPosition(position);
             }
         });
+
+        this.eventBus = EventAggregator.getInstance();
+        this.displayController = new DisplayController(this, eventBus, R.id.container);
+        this.displayController.subscribeToAppEvents();
+
+        eventBus.publish(EventType.ShowActionBar, null );
+        showFragmentAtPosition(0);
+    }
+
+    @Override
+    protected void onDestroy() {
+        this.displayController.unsubscribeFromAppEvents();
+        FragmentFactory.cleanupFragmentFactory();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        final BaseFragment visibleFrag = this.displayController.getLastVisibleFragment();
+
+        if(navDrawer.isOpen()) {
+            navDrawer.hide();
+            return;
+        }
+
+        if (visibleFrag == null || visibleFrag.Previous == null) {
+            super.onBackPressed();
+            return;
+        }
+
+        if (visibleFrag.hasInternalBackstack()) {
+            visibleFrag.onBackPressed();
+            return;
+        }
+
+        this.eventBus.publish(EventType.DisplayFragment, visibleFrag.Previous, visibleFrag.Previous.getArguments());
     }
 
     @Override
@@ -53,7 +79,25 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void showFragmentAtPosition(final int position) {
-        MessageBox.show(String.format("%s clicked", position));
+        FragTag tag;
+
+        switch (position) {
+            case 0:
+                tag = FragTag.Section1;
+                break;
+            case 1:
+                tag = FragTag.Section2;
+                break;
+            default:
+                tag = FragTag.Section1;
+                break;
+        }
+
+        showFragmentByTag(tag, this.navDrawer.getNavTextByPosition(position));
+    }
+
+    private void showFragmentByTag(FragTag tag, String actionBarTitle) {
+        this.eventBus.publish(EventType.DisplayFragment, this, BundleUtil.getBundleByFragTag(tag, actionBarTitle));
 
         if(this.navDrawer.isOpen()) {
             this.navDrawer.hide();
