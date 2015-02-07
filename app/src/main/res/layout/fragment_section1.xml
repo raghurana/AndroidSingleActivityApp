@@ -6,10 +6,19 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="0dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="This is section 1 Fragment"
         android:id="@+id/textView"
-        android:layout_gravity="center"
-        android:gravity="center_vertical|center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/ShowSection3Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Section 3"
+        android:layout_gravity="center_horizontal" />
+
 </LinearLayout>

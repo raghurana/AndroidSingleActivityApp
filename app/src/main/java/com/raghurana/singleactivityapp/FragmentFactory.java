@@ -8,12 +8,14 @@ import com.raghurana.singleactivityapp.constants.FragTag;
 import com.raghurana.singleactivityapp.events.EventAggregator;
 import com.raghurana.singleactivityapp.ui.fragments.Section1Fragment;
 import com.raghurana.singleactivityapp.ui.fragments.Section2Fragment;
+import com.raghurana.singleactivityapp.ui.fragments.Section3Fragment;
 import com.raghurana.singleactivityapp.utilities.BundleUtil;
 
 public class FragmentFactory {
 
     private static Section1Fragment section1Fragment;
     private static Section2Fragment section2Fragment;
+    private static Section3Fragment section3Fragment;
 
     public static BaseFragment getFragmentByTag(final Bundle fragBundle) {
 
@@ -31,12 +33,19 @@ public class FragmentFactory {
             return section2Fragment;
         }
 
+        if(tag == FragTag.Section3){
+            if(section3Fragment == null) section3Fragment = new Section3Fragment();
+            initBaseFrag(section3Fragment, fragBundle, tag);
+            return section3Fragment;
+        }
+
         return null;
     }
 
     public static void cleanupFragmentFactory() {
         section1Fragment = null;
         section2Fragment = null;
+        section3Fragment = null;
     }
 
     public static void initBaseFrag(BaseFragment baseFragment, Bundle fragBundle, FragTag navTag)  {

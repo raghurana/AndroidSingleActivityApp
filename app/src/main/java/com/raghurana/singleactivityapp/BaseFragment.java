@@ -21,7 +21,7 @@ public class BaseFragment extends Fragment {
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
-        checkTitleBar();
+        checkActionBar();
         super.onCreate(savedInstanceState);
     }
 
@@ -51,18 +51,18 @@ public class BaseFragment extends Fragment {
     //region Protected Methods
 
     protected void onShow() {
-        checkTitleBar();
+        checkActionBar();
     }
 
     protected void onHide() {
     }
 
-    protected boolean showTitleBar() {
+    protected boolean showActionBar() {
         return true;
     }
 
-    protected void checkTitleBar() {
-        if (showTitleBar())
+    protected void checkActionBar() {
+        if (showActionBar())
             EventBus.publish(EventType.ShowActionBar, null, null);
         else
             EventBus.publish(EventType.HideTitleBar, null, null);
